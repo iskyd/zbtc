@@ -1,7 +1,10 @@
 const std = @import("std");
+const consensus = @import("consensus/consensus.zig");
 
 pub fn main() !void {
     std.debug.print("Full node bitcoin implementation written in {s}.\n", .{"Zig"});
+    std.debug.print("This is a work in progress and is not ready for use.\n", .{});
+    std.debug.print("max_block_serialized_size {}", .{@as(u64, consensus.max_block_serialized_size)});
 }
 
 test "simple test" {
