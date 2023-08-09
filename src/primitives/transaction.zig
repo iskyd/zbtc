@@ -12,9 +12,15 @@ const OutPoint = struct {
         return self.*.hash == other.*.hash and self.*.n == other.*.n;
     }
 
-    pub fn to_string(self: *const OutPoint, allocator: std.mem.Allocator) ![]const u8 {
-        const string: []u8 = try std.fmt.allocPrint(allocator, "OutPoint(hash: {}, n: {})", .{ self.*.hash, self.*.n });
-        return string;
+    pub fn format(self: OutPoint, actual_fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
+        _ = actual_fmt;
+        _ = options;
+
+        try writer.print("OutPoint({d}, {d})", .{ self.hash, self.n });
+    }
+
+    pub fn toString(self: OutPoint, buffer: []u8) ![]u8 {
+        return std.fmt.bufPrint(buffer, "{}", .{self});
     }
 };
 
@@ -83,19 +89,29 @@ const TxIn = struct {
 };
 
 test "equal outpoint" {
-    const o1: OutPoint = .{ .hash = 0, .n = 0 };
-    const o2: OutPoint = .{ .hash = 0, .n = 0 };
-    const o3: OutPoint = .{ .hash = 1, .n = 0 };
+    const o1: OutPoint = .{ .hash = 0x1234567890abcdef, .n = 0 };
+    const o2: OutPoint = .{ .hash = 0x1234567890abcdef, .n = 0 };
+    const o3: OutPoint = .{ .hash = 0x1234567890abcdff, .n = 0 };
 
     try std.testing.expect(o1.eq(&o2));
     try std.testing.expect(o1.eq(&o3) == false);
 }
 
 test "outpoint tostring" {
-    const test_allocator = std.testing.allocator;
-    const o1: OutPoint = .{ .hash = 0, .n = 0 };
-    const string: []const u8 = try o1.to_string(test_allocator);
-    const expected_string: []const u8 = "OutPoint(hash: 0, n: 0)";
-    defer test_allocator.free(string);
+    const o1: OutPoint = .{ .hash = 0x1234567890abcdef, .n = 1 };
+
+    // 100 is the max size of the string
+    // it was calculated using
+    // var max_u256: u256 = std.math.maxInt(u256);
+    // var max_u32: u32 = std.math.maxInt(u32);
+    // var size = 12 + 2 + std.math.log10_int(max_u256) + std.math.log10_int(max_u32);
+    // std.math.log10_int() returns the number of digits in the number - 1
+    // 12 is the number of characters in "OutPoint(, )"
+    // 2 (1+1) is the missing numbers from log10_int()
+    // std.debug.print("max_size: {}\n", .{size});
+    var buffer: [100]u8 = undefined;
+
+    const string: []const u8 = try o1.toString(&buffer);
+    const expected_string: []const u8 = "OutPoint(1311768467294899695, 1)";
     try std.testing.expect(std.mem.eql(u8, string, expected_string));
 }
