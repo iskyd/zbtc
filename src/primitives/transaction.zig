@@ -82,9 +82,43 @@ const TxIn = struct {
         return !self.eq(other);
     }
 
-    pub fn toString(self: *const TxIn, allocator: std.mem.Allocator) ![]const u8 {
+    pub fn toString(self: TxIn, allocator: std.mem.Allocator) ![]const u8 {
         _ = allocator;
         _ = self;
+    }
+};
+
+const TxOut = struct {
+    n_value: i64,
+    script_pubkey: script.Script,
+
+    pub fn setNull(self: TxOut) void {
+        self.n_value = -1;
+        self.script_pubkey = undefined;
+    }
+
+    pub fn isNull(self: TxOut) bool {
+        return self.n_value == -1;
+    }
+
+    pub fn eq(self: TxOut, other: *const TxOut) bool {
+        return self.n_value == other.n_value and
+            self.script_pubkey.eq(other.script_pubkey);
+    }
+
+    pub fn neq(self: TxOut, other: *const TxOut) bool {
+        return !self.eq(other);
+    }
+
+    pub fn format(self: TxOut, actual_fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
+        _ = actual_fmt;
+        _ = options;
+
+        try writer.print("TxOut(n_value={d}, script_pub_key={s})", .{ self.n_value, self.script_pubkey });
+    }
+
+    pub fn toString(self: TxOut, buffer: []u8) ![]u8 {
+        return std.fmt.bufPrint(buffer, "{}", .{self});
     }
 };
 
