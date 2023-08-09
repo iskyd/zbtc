@@ -12,14 +12,14 @@ pub const coin: i64 = 100000000;
 // for the creation of coins out of thin air modification could lead to a fork.
 pub const max_money: i64 = 21000000 * coin;
 
-pub inline fn money_range(amount: i64) bool {
+pub inline fn moneyRange(amount: i64) bool {
     return amount >= 0 and amount <= max_money;
 }
 
-test "money_range" {
-    try std.testing.expect(money_range(10) == true);
-    try std.testing.expect(money_range(21000000 * coin) == true);
-    try std.testing.expect(money_range(21000001 * coin) == false);
-    try std.testing.expect(money_range(0) == true);
-    try std.testing.expect(money_range(-1) == false);
+test "moneyRange" {
+    try std.testing.expect(moneyRange(10) == true);
+    try std.testing.expect(moneyRange(21000000 * coin) == true);
+    try std.testing.expect(moneyRange(21000001 * coin) == false);
+    try std.testing.expect(moneyRange(0) == true);
+    try std.testing.expect(moneyRange(-1) == false);
 }

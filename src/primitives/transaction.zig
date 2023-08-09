@@ -82,7 +82,7 @@ const TxIn = struct {
         return !self.eq(other);
     }
 
-    pub fn to_string(self: *const TxIn, allocator: std.mem.Allocator) ![]const u8 {
+    pub fn toString(self: *const TxIn, allocator: std.mem.Allocator) ![]const u8 {
         _ = allocator;
         _ = self;
     }

@@ -1,4 +1,4 @@
-pub fn check_transaction(tx: *Transaction, state: *TxValidationState) !bool {
+pub fn checkTransaction(tx: *Transaction, state: *TxValidationState) !bool {
     if (tx.vin.empty()) {
         return false;
     }
