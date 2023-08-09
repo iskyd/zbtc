@@ -1,11 +1,21 @@
 const math = @import("std").math;
 const script = @import("../script/script.zig");
+const std = @import("std");
 
 // An outpoint - a combination of a transaction hash and an index n into its vout
 const OutPoint = struct {
     hash: u256,
     n: u32,
-    comptime null_index: i32 = math.maxInt(u32),
+    comptime null_index: u32 = math.maxInt(u32),
+
+    pub fn eq(self: *const OutPoint, other: *const OutPoint) bool {
+        return self.*.hash == other.*.hash and self.*.n == other.*.n;
+    }
+
+    pub fn to_string(self: *const OutPoint, allocator: std.mem.Allocator) ![]const u8 {
+        const string: []u8 = try std.fmt.allocPrint(allocator, "OutPoint(hash: {}, n: {})", .{ self.*.hash, self.*.n });
+        return string;
+    }
 };
 
 // An input of a transaction.  It contains the location of the previous
@@ -55,4 +65,37 @@ const TxIn = struct {
     // multiplying by 512 = 2^9, or equivalently shifting up by
     // 9 bits.
     sequence_locktime_granularity: i32 = 9,
+
+    pub fn eq(self: *const TxIn, other: *const TxIn) bool {
+        return self.*.prevout.eq(other.*.prevout) and
+            self.*.script_sig.eq(other.*.script_sig) and
+            self.*.n_sequence == other.*.n_sequence;
+    }
+
+    pub fn neq(self: *const TxIn, other: *const TxIn) bool {
+        return !self.eq(other);
+    }
+
+    pub fn to_string(self: *const TxIn, allocator: std.mem.Allocator) ![]const u8 {
+        _ = allocator;
+        _ = self;
+    }
 };
+
+test "equal outpoint" {
+    const o1: OutPoint = .{ .hash = 0, .n = 0 };
+    const o2: OutPoint = .{ .hash = 0, .n = 0 };
+    const o3: OutPoint = .{ .hash = 1, .n = 0 };
+
+    try std.testing.expect(o1.eq(&o2));
+    try std.testing.expect(o1.eq(&o3) == false);
+}
+
+test "outpoint tostring" {
+    const test_allocator = std.testing.allocator;
+    const o1: OutPoint = .{ .hash = 0, .n = 0 };
+    const string: []const u8 = try o1.to_string(test_allocator);
+    const expected_string: []const u8 = "OutPoint(hash: 0, n: 0)";
+    defer test_allocator.free(string);
+    try std.testing.expect(std.mem.eql(u8, string, expected_string));
+}
