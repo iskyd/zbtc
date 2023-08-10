@@ -103,7 +103,7 @@ const TxOut = struct {
 
     pub fn eq(self: TxOut, other: *const TxOut) bool {
         return self.n_value == other.n_value and
-            self.script_pubkey.eq(other.script_pubkey);
+            self.script_pubkey.eq(&other.script_pubkey);
     }
 
     pub fn neq(self: TxOut, other: *const TxOut) bool {
@@ -148,4 +148,15 @@ test "outpoint tostring" {
     const string: []const u8 = try o1.toString(&buffer);
     const expected_string: []const u8 = "OutPoint(1311768467294899695, 1)";
     try std.testing.expect(std.mem.eql(u8, string, expected_string));
+}
+
+test "TxOut eq" {
+    const out1: TxOut = .{ .n_value = 1, .script_pubkey = undefined };
+    const out2: TxOut = .{ .n_value = 1, .script_pubkey = undefined };
+    const out3: TxOut = .{ .n_value = 2, .script_pubkey = undefined };
+
+    try std.testing.expect(out1.eq(&out2));
+    try std.testing.expect(out1.eq(&out3) == false);
+    try std.testing.expect(out1.neq(&out2) == false);
+    try std.testing.expect(out1.neq(&out3));
 }

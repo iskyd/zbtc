@@ -15,6 +15,13 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
+    const primitives_module = b.createModule(.{ .source_file = .{ .path = "src/primitives/primitives.zig" } });
+    _ = primitives_module;
+    const consensus_module = b.createModule(.{ .source_file = .{ .path = "src/consensus/consensus.zig" } });
+    _ = consensus_module;
+    const script_module = b.createModule(.{ .source_file = .{ .path = "src/script/script.zig" } });
+    _ = script_module;
+
     const exe = b.addExecutable(.{
         .name = "zbtc",
         // In this case the main source file is merely a path, however, in more
@@ -59,6 +66,9 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+    // unit_tests.addModule("primitives", primitives_module);
+    // unit_tests.addModule("consensus", consensus_module);
+    // unit_tests.addModule("script", script_module);
 
     const run_unit_tests = b.addRunArtifact(unit_tests);
 
