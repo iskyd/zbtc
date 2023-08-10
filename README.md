@@ -7,3 +7,6 @@ This project is just for educational purpose, I'm trying to learn Zig and Bitcoi
 zig build test
 ```
 
+```
+zig test <path> --main-pkg-path .
+```
