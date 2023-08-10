@@ -1,6 +1,9 @@
 const math = @import("std").math;
 const script = @import("../script/script.zig");
+const moneyRange = @import("../consensus/amount.zig").moneyRange;
 const std = @import("std");
+
+const TransactionError = error{OutOfRangeError};
 
 // An outpoint - a combination of a transaction hash and an index n into its vout
 const OutPoint = struct {
@@ -119,6 +122,41 @@ const TxOut = struct {
 
     pub fn toString(self: TxOut, buffer: []u8) ![]u8 {
         return std.fmt.bufPrint(buffer, "{}", .{self});
+    }
+};
+
+const Transaction = struct {
+    current_version: i32 = 2, // Default transaction version
+    vin: []TxIn,
+    vout: []TxOut,
+    n_lock_time: u32,
+    n_version: i32,
+    hash: u256,
+    m_witness_hash: u256,
+
+    pub fn isNull(self: Transaction) bool {
+        return self.vin.len == 0 and self.vout.len == 0;
+    }
+
+    pub fn getHash(self: Transaction) u256 {
+        return self.hash;
+    }
+
+    pub fn getWitnessHash(self: Transaction) u256 {
+        return self.m_witness_hash;
+    }
+
+    pub fn getValueOut(self: Transaction) !i64 {
+        var n_value_out = 0;
+        for (self.vout) |vout| {
+            if (!moneyRange(vout.n_value) or !moneyRange(vout.n_value + n_value_out)) {
+                return TransactionError.OutOfRangeError;
+            }
+
+            n_value_out += vout.n_value;
+        }
+
+        return n_value_out;
     }
 };
 
